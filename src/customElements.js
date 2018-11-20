@@ -1,3 +1,6 @@
+const HTMLElement = require('./HTMLElement');
+const { html } = require('common-tags');
+
 module.exports = {
   define(name, constructor, options) {
     return new CustomElementsNode(name, constructor, options);
@@ -9,41 +12,51 @@ class CustomElementsNode {
     this.name = name;
     this.constructor = constructor;
     this.options = options;
+    this.modifiedConstructorString = constructor.toString()
+      .replace('constructor(', 'constructor_original(')
+      .replace('super();', '')
+      .replace('super()', '');
+    this.modifiedConstructor = eval('('+this.modifiedConstructorString+')');
   }
 
-  async get() {
-    return element() + '\n' + await script();
+  template(vm) {
+    const template = new this.modifiedConstructor().template(vm);
+    return html`
+      <template id="${this.name}">
+        ${template}
+      </template>
+      <${this.name}></${this.name}>
+      <script>
+        customElements.define("${this.name}",` + buildClientConstructorString(this.name, this.modifiedConstructorString, true) + html`);
+      </script>
+    `;
   }
 
-  element() {
-    return `<${this.name}></${this.name}>`;
-  }
-
-  async script() {
-    return `<script>customElements.define("${this.name}",` + this.constructorString() + ');</script>';
-  }
-
-  async constructorString(serverRender = true) {
-    let str = c.toString();
-    let newContructor;
-    str = str.replace('constructor(', 'constructor_original(').replace('super()', '');
-    if (serverRender) {
-      const nc = new c();
-      if (nc.serverRender) newContructor = buildNewConstructor(await nc.serverRender());
-    }
-    if (!newContructor) newContructor = buildNewConstructor();
-
-    str.splice(str.indexOf('{'), 0, newContructor);
+  noTemplate() {
+    return html`
+      <${this.name}></${this.name}>
+      <script>
+        customElements.define("${this.name}",` + buildClientConstructorString(this.name, this.modifiedConstructorString) + html`);
+      </script>
+    `;
   }
 };
 
 
-function buildNewConstructor(serverRenderTemplate) {
-  return `\n
-    constructor() {
-      super();
-      constructor_original();
-      ${hasServerRender ? `serverRenderInject(${serverRenderTemplate});` : ''}
-    }
-  \n\n`;
+function buildClientConstructorString(name, constructorString, hasTemplate = false) {
+  const templateCloner = `
+    var template = document.getElementById('${name}');
+    var templateContent = template.content;
+    var shadowRoot = this.shadowRoot ? this.shadowRoot : this.attachShadow({mode: 'open'})
+    shadowRoot.appendChild(templateContent.cloneNode(true));
+  `;
+  const newConstructor = `
+  constructor() {
+    super();
+    this.constructor_original();
+    ${hasTemplate ? templateCloner : ''}
+  }
+  `;
+  const pos = constructorString.indexOf('{') + 1;
+  return [constructorString.slice(0, pos), newConstructor, constructorString.slice(pos)].join('');
 }
