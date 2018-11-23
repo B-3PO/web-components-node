@@ -1,6 +1,8 @@
 const HTMLElement = require('./HTMLElement');
 const { html } = require('common-tags');
 
+const hyphenCaseReg = /-\w/g;
+
 module.exports = {
   define(name, constructor, options) {
     return new CustomElementsNode(name, constructor, options);
@@ -26,7 +28,7 @@ class CustomElementsNode {
       <template id="${this.name}">
         ${template}
       </template>
-      <${this.name}></${this.name}>
+      <${this.name} id="$${toCamelCase(this.name)}"></${this.name}>
       <script>
         customElements.define("${this.name}",` + buildClientConstructorString(this.name, this.hasOriginalConstructor, this.modifiedConstructorString, true) + html`);
       </script>
@@ -35,7 +37,7 @@ class CustomElementsNode {
 
   noTemplate() {
     return html`
-      <${this.name}></${this.name}>
+      <${this.name} id="$${toCamelCase(this.name)}"></${this.name}>
       <script>
         customElements.define("${this.name}",` + buildClientConstructorString(this.name, this.hasOriginalConstructor, this.modifiedConstructorString) + html`);
       </script>
@@ -60,4 +62,8 @@ function buildClientConstructorString(name, hasOriginalConstructor, constructorS
   `;
   const pos = constructorString.indexOf('{') + 1;
   return [constructorString.slice(0, pos), newConstructor, constructorString.slice(pos)].join('');
+}
+
+function toCamelCase(value) {
+  return value.replace(hyphenCaseReg, m => m[1].toUpperCase());
 }
