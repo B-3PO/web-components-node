@@ -12,6 +12,7 @@ class CustomElementsNode {
     this.name = name;
     this.constructor = constructor;
     this.options = options;
+    this.hasOriginalConstructor = constructor.toString().indexOf('constructor(') > 0;
     this.modifiedConstructorString = constructor.toString()
       .replace('constructor(', 'constructor_original(')
       .replace('super();', '')
@@ -27,7 +28,7 @@ class CustomElementsNode {
       </template>
       <${this.name}></${this.name}>
       <script>
-        customElements.define("${this.name}",` + buildClientConstructorString(this.name, this.modifiedConstructorString, true) + html`);
+        customElements.define("${this.name}",` + buildClientConstructorString(this.name, this.hasOriginalConstructor, this.modifiedConstructorString, true) + html`);
       </script>
     `;
   }
@@ -36,14 +37,14 @@ class CustomElementsNode {
     return html`
       <${this.name}></${this.name}>
       <script>
-        customElements.define("${this.name}",` + buildClientConstructorString(this.name, this.modifiedConstructorString) + html`);
+        customElements.define("${this.name}",` + buildClientConstructorString(this.name, this.hasOriginalConstructor, this.modifiedConstructorString) + html`);
       </script>
     `;
   }
 };
 
 
-function buildClientConstructorString(name, constructorString, hasTemplate = false) {
+function buildClientConstructorString(name, hasOriginalConstructor, constructorString, hasTemplate = false) {
   const templateCloner = `
     var template = document.getElementById('${name}');
     var templateContent = template.content;
@@ -53,7 +54,7 @@ function buildClientConstructorString(name, constructorString, hasTemplate = fal
   const newConstructor = `
   constructor() {
     super();
-    this.constructor_original();
+    ${hasOriginalConstructor ? 'this.constructor_original();' : ''}
     ${hasTemplate ? templateCloner : ''}
   }
   `;
