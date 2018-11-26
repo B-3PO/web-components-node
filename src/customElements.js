@@ -6,6 +6,11 @@ const hyphenCaseReg = /-\w/g;
 module.exports = {
   define(name, constructor, options) {
     return new CustomElementsNode(name, constructor, options);
+  },
+
+  defineWithRender(name, constructor, options = {}) {
+    options._addRenderMethod = true;
+    return new CustomElementsNode(name, constructor, options);
   }
 };
 
@@ -23,14 +28,22 @@ class CustomElementsNode {
   }
 
   template(vm) {
-    const template = new this.modifiedConstructor().template(vm);
+    const elementsClass = new this.modifiedConstructor();
+    if (this.hasOriginalConstructor) {
+      try {
+        elementsClass.constructor_original();
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    const template = elementsClass.template(Object.assign({}, elementsClass, vm));
     return html`
       <template id="${this.name}">
         ${template}
       </template>
       <${this.name} id="$${toCamelCase(this.name)}"></${this.name}>
       <script>
-        customElements.define("${this.name}",` + buildClientConstructorString(this.name, this.hasOriginalConstructor, this.modifiedConstructorString, true) + html`);
+        customElements.define("${this.name}",` + this.buildClientConstructorString(true) + html`);
       </script>
     `;
   }
@@ -39,30 +52,52 @@ class CustomElementsNode {
     return html`
       <${this.name} id="$${toCamelCase(this.name)}"></${this.name}>
       <script>
-        customElements.define("${this.name}",` + buildClientConstructorString(this.name, this.hasOriginalConstructor, this.modifiedConstructorString) + html`);
+        customElements.define("${this.name}",` + this.buildClientConstructorString() + html`);
       </script>
     `;
   }
-};
 
-
-function buildClientConstructorString(name, hasOriginalConstructor, constructorString, hasTemplate = false) {
-  const templateCloner = `
-    var template = document.getElementById('${name}');
-    var templateContent = template.content;
-    var shadowRoot = this.shadowRoot ? this.shadowRoot : this.attachShadow({mode: 'open'})
-    shadowRoot.appendChild(templateContent.cloneNode(true));
-  `;
-  const newConstructor = `
-  constructor() {
-    super();
-    ${hasOriginalConstructor ? 'this.constructor_original();' : ''}
-    ${hasTemplate ? templateCloner : ''}
+  buildClientConstructorString(hasTemplate = false) {
+    const templateCloner = `
+      var template = document.getElementById('${this.name}');
+      var templateContent = template.content;
+      var shadowRoot = this.shadowRoot ? this.shadowRoot : this.attachShadow({mode: 'open'});
+      shadowRoot.appendChild(templateContent.cloneNode(true));
+    `;
+    const newConstructor = `
+    constructor() {
+      super();
+      ${this.hasOriginalConstructor ? 'this.constructor_original();' : ''}
+      ${hasTemplate ? templateCloner : ''}
+    }
+    `;
+    const pos = this.modifiedConstructorString.indexOf('{') + 1;
+    if (this.options._addRenderMethod) return [this.modifiedConstructorString.slice(0, pos), newConstructor, this.buildRenderMethod(), this.modifiedConstructorString.slice(pos)].join('');
+    return [this.modifiedConstructorString.slice(0, pos), newConstructor, this.modifiedConstructorString.slice(pos)].join('');
   }
-  `;
-  const pos = constructorString.indexOf('{') + 1;
-  return [constructorString.slice(0, pos), newConstructor, constructorString.slice(pos)].join('');
-}
+
+  buildRenderMethod() {
+    if (this.modifiedConstructorString.indexOf('template(') === -1) {
+      throw Error('expected `template` method');
+    }
+    if (this.modifiedConstructorString.indexOf('id="content"') === -1) {
+      throw Error('expected `<div id="content">` wrapper for all html content in template');
+    }
+    const hasPreRender = this.modifiedConstructorString.indexOf('preRender(') > 0;
+    const hasPostRender = this.modifiedConstructorString.indexOf('postRender(') > 0;
+    return `
+      render() {
+        ${hasPreRender ? 'this.preRender()' : ''}
+        var templateElement = document.createElement('template');
+        templateElement.innerHTML = this.template();
+        var clone = templateElement.content.cloneNode(true);
+        var shadowRoot = this.shadowRoot ? this.shadowRoot : this.attachShadow({mode: 'open'})
+        shadowRoot.querySelector('div#content').innerHTML = clone.querySelector('div#content').innerHTML;
+        ${hasPostRender ? 'this.postRender()' : ''}
+      }
+    `;
+  }
+};
 
 function toCamelCase(value) {
   return value.replace(hyphenCaseReg, m => m[1].toUpperCase());
