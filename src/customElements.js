@@ -10,6 +10,16 @@ module.exports = {
 
   defineWithRender(name, constructor, options = {}) {
     options._addRenderMethod = true;
+
+    // validate template
+    // we need to make sure there is a <div id="content"> container
+    const tempClass = new constructor();
+    const tempTemplate = tempClass.template();
+
+    if (!tempTemplate.includes('id="content"')) {
+      throw Error('defineWithRender requires a container with id="content" (<div id="content"><!-- body here --></div>)');
+    }
+
     return new CustomElementsNode(name, constructor, options);
   }
 };

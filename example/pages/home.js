@@ -1,14 +1,20 @@
-const { html } = require('common-tags');
 const {
   customElements,
-  HTMLElement
+  HTMLElement,
+  html
 } = require('../../index');
 
 
-const page = customElements.define('404-page', class extends HTMLElement {
+const page = customElements.defineWithRender('home-page', class extends HTMLElement {
+  connectedCallback() {
+    this.render();
+  }
+
   template() {
     return html`
-      <h4>Page not found.</h4>
+      <div id="content">
+        <h4>Page not found.</h4>
+      </div>
     `;
   }
 });

@@ -1,13 +1,13 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
+const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
 app.use(morgan('dev'));
 app.use(bodyParser.json());
-
-app.use('/assets', express.static(__dirname + '/src'));
+app.use('/assets', express.static(__dirname));
 
 app.use('/', require('./router'));
 

@@ -1,4 +1,4 @@
-const { html } = require('common-tags');
+const { html } = require('../../index');
 
 module.exports = async () => ({
   title: '404',
