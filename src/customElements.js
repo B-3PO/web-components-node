@@ -46,10 +46,11 @@ class CustomElementsNode {
         console.error(e);
       }
     }
-    const template = elementsClass.template(Object.assign({}, elementsClass, vm));
+    // add passed in data to class, this will make it accessible on "this"
+    Object.assign(elementsClass, vm);
     return html`
       <template id="${this.name}">
-        ${template}
+        ${elementsClass.template()}
       </template>
       <${this.name} id="$${toCamelCase(this.name)}"></${this.name}>
       <script>
@@ -102,7 +103,9 @@ class CustomElementsNode {
         templateElement.innerHTML = this.template();
         var clone = templateElement.content.cloneNode(true);
         var shadowRoot = this.shadowRoot ? this.shadowRoot : this.attachShadow({mode: 'open'})
-        shadowRoot.querySelector('div#content').innerHTML = clone.querySelector('div#content').innerHTML;
+        var shadowContentDiv = shadowRoot.querySelector('div#content');
+        if (!shadowContentDiv) shadowRoot.appendChild(clone);
+        else shadowContentDiv.innerHTML = clone.querySelector('div#content').innerHTML;
         ${hasPostRender ? 'this.postRender()' : ''}
       }
     `;

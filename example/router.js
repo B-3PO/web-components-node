@@ -3,10 +3,13 @@ const router = express.Router();
 const pageTemplate = require('./pageTemplate');
 const { PageMapper } = require('../index');
 const pageMapper = new PageMapper('example/pages');
+const { getList } = require('./services/list');
 
 // api router
-router.get('/api/test', (req, res) => {
-
+router.get('/api/list', (req, res) => {
+  res.send({
+    list: getList()
+  });
 });
 
 // Page route

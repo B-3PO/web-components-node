@@ -10,10 +10,11 @@ module.exports = ({ body, title }) => html`
       <title>${title}</title>
       <meta http-equiv="Cache-Control" content="no-store" />
       <link rel="stylesheet" href="/assets/main.css">
+      <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
       ${browserScripts.include()}
     </head>
 
-    <body style="margin: 0;">
+    <body>
       ${body}
     </body>
   </html>

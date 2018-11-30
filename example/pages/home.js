@@ -5,15 +5,11 @@ const {
 } = require('../../index');
 
 
-const page = customElements.defineWithRender('home-page', class extends HTMLElement {
-  connectedCallback() {
-    this.render();
-  }
-
+const page = customElements.define('home-page', class extends HTMLElement {
   template() {
     return html`
       <div id="content">
-        <h4>Page not found.</h4>
+        <h2>Home</h2>
       </div>
     `;
   }
