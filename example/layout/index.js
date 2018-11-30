@@ -1,7 +1,9 @@
 const {
   browserScripts,
   html
-} = require('../index');
+} = require('../../index');
+const header = require('./header');
+const nav = require('./navigation');
 
 module.exports = ({ body, title }) => html`
   <!DOCTYPE html>
@@ -15,6 +17,8 @@ module.exports = ({ body, title }) => html`
     </head>
 
     <body>
+      ${header({ title })}
+      ${nav({ title })}
       ${body}
     </body>
   </html>

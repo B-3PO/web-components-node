@@ -25,9 +25,9 @@ const page = customElements.defineWithRender('home-page', class extends HTMLElem
 
         <div>
           <ul>
-            ${this.list.map(i => (
-              `<li>${i.name}</li>`
-            )).join('\n')}
+            ${this.list.map(i => html`
+              <li>${i.name}</li>
+            `).join('\n')}
           </ul>
         </div>
       </div>
@@ -39,7 +39,7 @@ module.exports = async () => {
   const list = getList();
 
   return {
-    title: '404',
+    title: 'List Client Render',
     body: page.noTemplate()
   };
 };

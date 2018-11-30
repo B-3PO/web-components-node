@@ -16,6 +16,6 @@ const page = customElements.define('home-page', class extends HTMLElement {
 });
 
 module.exports = async () => ({
-  title: '404',
+  title: 'Home',
   body: page.template()
 });

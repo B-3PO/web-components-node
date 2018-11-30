@@ -1,3 +1,32 @@
 body {
+  margin: 0;
   font-family: 'Open Sans', sans-serif;
+}
+
+header > div {
+  width: 100%;
+  line-height: 54px;
+  padding-left: 8px;
+  color: white;
+  font-size: 18px;
+  background-color: #00AEFF;
+}
+
+nav {
+  width: 100%;
+  line-height: 54px;
+  padding-left: 8px;
+  font-size: 16px;
+  background-color: #00AEFF;
+}
+
+nav > a {
+  padding-right: 6px;
+  padding-left: 6px;
+  color: #FFE6FA;
+  text-decoration: none;
+}
+
+nav > a.current {
+  font-weight: bold;
 }
