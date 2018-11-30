@@ -3,62 +3,73 @@
 # Example:
 
 ```javascript
-const { html } = require('common-tags');
 const {
   customElements,
-  HTMLElement
-} = require('customElementsNode');
+  HTMLElement,
+  html
+} = require('../../index');
+const { getStates } = require('../services/states');
 
-const page = customElements.defineWidthRender('index-page', class extends HTMLElement {
-  // this gets called on both the server and browser
+
+const page = customElements.defineWithRender('home-page', class extends HTMLElement {
   constructor() {
     super();
-    this.name = 'client';
+    this.list = [];
+    this.states = [];
+    this.cities = [];
+    this.selectedState = null;
+    this.selectedCity = null;
   }
 
-  // this will only run in the browser
-  // you can do all you data fetching and re rendering in here
-  connectedCallback() {
-    setTimeout(() => {
-      // the render method is injected by customElements.defineWidthRender
-      // if you just use define then there will be no render method
-      // render will only replace the content in <div id="content">
-      this.render();
-    }, 2000);
+  async connectedCallback() {
+    const { data } = await axios.get('/api/states');
+    this.states = data.states;
+    this.render();
   }
 
-  // the preRender method is called when the injected render method from customElements.defineWidthRender is invoked
-  preRender() {
-
-  }
-  // the postRender method is called when the injected render method from customElements.defineWidthRender is invoked
-  postRender() {
-
-  }
-
-  template(vm) {
-    vm = vm || this;
+  template() {
     return html`
-      <style>
-      </style>
-
-      <!-- <div id="render"> is required for the injected render method to work -->
       <div id="content">
-        <div>hello world from ${vm.name}</div>
+        <h2>Interactive</h2>
 
-        <!-- $indexPage is added for you. This will give you access to the class -->
-        <button onclick="$indexPage.testClick(this, 'someothervalue')">test</button>
+        <div>
+          <select onchange="$homePage.stateSelectChange(this.value)">
+            <option value="" disabled ${this.selectedState === null ? 'selected' : ''}>State...</option>
+            ${this.states.map(s => html`
+              <option value="${s.name}" ${this.selectedState === s.name ? 'selected' : ''}>${s.name}</option>
+            `).join('\n')}
+          </select>
+
+          <select onchange="$homePage.citySelectChange(this.value)">
+            <option value="" disabled ${this.selectedCity === null ? 'selected' : ''}>City...</option>
+            ${this.cities.map(c => html`
+              <option value="${c.name}" ${this.selectedCity === c.name ? 'selected' : ''}>${c.name}</option>
+            `).join('\n')}
+          </select>
+        </div>
       </div>
     `;
   }
 
-  testClick(element, text) {
-    alert('the button was clicked');
+  stateSelectChange(value) {
+    this.selectedState = value;
+    const state = this.states.find(i => i.name === value);
+    if (state) this.cities = state.cities;
+    else this.cities = [];
+    this.selectedCity = null;
+    this.render();
+  }
+
+  citySelectChange(value) {
+    this.selectedCity = value;
   }
 });
 
 module.exports = async () => {
-  const name = 'server';
-  return page.template({ name: name });
-}
+  const states = await getStates();
+  return {
+    title: 'Interactive',
+    body: page.template({ states })
+  };
+};
 ```
