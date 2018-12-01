@@ -4,10 +4,10 @@
 - [Links](#Links)
 - [Config](#Config)
 - [Example](#Example)
-- [Why?](#Why?)
 - [Features](#Features)
   - [HTML Templates](#featuer1)
   - [Attach code to an element](#featuer2)
+- [Why?](#Why?)
 
 # Note to all
 This project is in its early stages and is not well defined yet.
