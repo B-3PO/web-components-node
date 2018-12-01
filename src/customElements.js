@@ -1,4 +1,5 @@
 const HTMLElement = require('./HTMLElement');
+const { get: getConfig } = require('./config');
 const { html } = require('common-tags');
 
 const hyphenCaseReg = /-\w/g;
@@ -48,9 +49,10 @@ class CustomElementsNode {
     }
     // add passed in data to class, this will make it accessible on "this"
     Object.assign(elementsClass, vm);
+    const templateMethodName = getConfig().templateMethod;
     return html`
       <template id="${this.name}">
-        ${elementsClass.template()}
+        ${elementsClass[templateMethodName]()}
       </template>
       <${this.name} id="$${toCamelCase(this.name)}"></${this.name}>
       <script>
@@ -100,7 +102,7 @@ class CustomElementsNode {
       render() {
         ${hasPreRender ? 'this.preRender()' : ''}
         var templateElement = document.createElement('template');
-        templateElement.innerHTML = this.template();
+        templateElement.innerHTML = this.${getConfig().templateMethod}();
         var clone = templateElement.content.cloneNode(true);
         var shadowRoot = this.shadowRoot ? this.shadowRoot : this.attachShadow({mode: 'open'})
         var shadowContentDiv = shadowRoot.querySelector('div#content');

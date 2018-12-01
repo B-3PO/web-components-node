@@ -3,7 +3,12 @@ const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const path = require('path');
 const app = express();
+const { setConfig } = require('../index');
 const PORT = process.env.PORT || 3001;
+
+setConfig({
+  templateMethod: 'template' // this is the default
+});
 
 app.use(morgan('dev'));
 app.use(bodyParser.json());

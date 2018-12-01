@@ -2,6 +2,7 @@
 - [Introduction](#Introduction)
 - [Goal](#Goal)
 - [Links](#Links)
+- [Config][#Config]
 - [Example](#Example)
 - [Why?](#Why?)
 
@@ -19,6 +20,16 @@ To create a set of tools that let you serve web-components from a server, Pre-re
 # Links
 [MDZ Web Components](https://developer.mozilla.org/en-US/docs/Web/Web_Components)
 [Web Components site](https://www.webcomponents.org/introduction)
+
+# Config
+```javascript
+const { setConfig } = require('customElementsNode')
+
+setConfig({
+  // the method that is used for server-side rendering
+  templateMethod: 'template' // this is the default
+});
+```
 
 # Example:
 For a full example take a look at the example folder.

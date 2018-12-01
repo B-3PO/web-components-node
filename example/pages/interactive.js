@@ -1,3 +1,8 @@
+/*
+ * fully interactive page
+ * Initially renders on serverside
+ * Client re-renders page on state selection
+ */
 const {
   customElements,
   HTMLElement,
@@ -5,7 +10,7 @@ const {
 } = require('../../index');
 const { getStates } = require('../services/states');
 
-
+// https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_custom_elements#Autonomous_custom_elements
 const page = customElements.defineWithRender('home-page', class extends HTMLElement {
   constructor() {
     super();
@@ -16,12 +21,21 @@ const page = customElements.defineWithRender('home-page', class extends HTMLElem
     this.selectedCity = null;
   }
 
+  /*
+   * this only runs client side
+   * https://developer.mozilla.org/en-US/docs/Web/Web_Components#Reference
+   */
   async connectedCallback() {
     const { data } = await axios.get('/api/states');
     this.states = data.states;
     this.render();
   }
 
+  /*
+   * Template is a custom methods that is used for server side rendering and is not part of the customElements spec
+   * You can change the template method
+   * https://github.com/B-3PO/customElementsNode#Config
+   */
   template() {
     return html`
       <div id="content">

@@ -1,5 +1,6 @@
 const { html } = require('../../index');
 
+// just send some html
 module.exports = async () => ({
   title: '404',
   body: html`
