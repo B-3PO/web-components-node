@@ -21,6 +21,14 @@ To create a set of tools that let you serve web-components from a server, Pre-re
 [Web Components site](https://www.webcomponents.org/introduction)
 
 # Example:
+For a full example take a look at the example folder.
+```javascript
+  // run example locally
+  // clone the repo
+  npm i
+  npm run example
+```
+
 This is a short example of serving a page from an Expess server that can re-render on the font end
 ```javascript
 // express endpoint
