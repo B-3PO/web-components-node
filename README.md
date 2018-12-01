@@ -6,8 +6,8 @@
 - [Example](#Example)
 - [Why?](#Why?)
 - [Features](#Features)
-  - [HTML Templates](#1. Templating HTML)
-  - [Attach code to an element](#2. Attached code to an Element)
+  - [HTML Templates](#featuer1)
+  - [Attach code to an element](#featuer2)
 
 # Note to all
 This project is in its early stages and is not well defined yet.
@@ -149,7 +149,7 @@ async function buildPage() {
 # Features
 Here is a list of features that frameworks provide. I will show how you can use native web features to achieve them. I will also show how using this library can help make using these features simpler.
 
-#### 1. Templating HTML
+#### 1. <a name="featuer1"></a> Templating HTML
 There are many ways to Template html. You can use template languages (mustache, ejs, ...) and render on the server-side. You can use one of the many frameworks and create a SPA (single page application). Since ES6 we can now use a native feature called Template literals (AKA template strings) to render our HTML. This means that you can render on both the server and the client because this is just javascript.
 
 **ES6 Template Literals**
@@ -171,7 +171,7 @@ template({
 });
 ```
 
-#### 2. Attached code to an Element
+#### 2. <a name="featuer2"><a/>Attached code to an Element
 Prior to frameworks there was no way to attach a function to an element. The only option was to make everything global. This is one of the biggest problems that frameworks solved. Most frameworks will let you create a custom element and a controller that is attached to it. Now we have web components, and it is now easy to natively attached a class to an element by extending HTMLElement.
 
 **Web Component :  customeElements**
