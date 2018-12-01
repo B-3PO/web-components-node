@@ -2,7 +2,7 @@
 - [Introduction](#Introduction)
 - [Goal](#Goal)
 - [Links](#Links)
-- [Config][#Config]
+- [Config](#Config)
 - [Example](#Example)
 - [Why?](#Why?)
 
