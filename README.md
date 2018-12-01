@@ -40,7 +40,7 @@ For a full example take a look at the example folder.
   npm run example
 ```
 
-This is a short example of serving a page from an Expess server that can re-render on the font end
+This is a short example of serving a page from an Expess server that can re-render on the font end. This example assumes you have previous knowledge of Node+Expressjs
 ```javascript
 // express endpoint
 app.get('/home', async (req, res) => {
