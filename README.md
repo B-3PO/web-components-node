@@ -1,5 +1,4 @@
 ### Sections
-- [Note to all](#Note to all)
 - [Introduction](#Introduction)
 - [Goal](#Goal)
 - [Links](#Links)
