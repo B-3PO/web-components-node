@@ -22,9 +22,9 @@ To create a set of tools that let you serve web-components from a server, Pre-re
 
 # Example:
 For a full example take a look at the example folder.
-```javascript
-  // run example locally
-  // clone the repo
+```bash
+  # run example locally
+  # clone the repo
   npm i
   npm run example
 ```
