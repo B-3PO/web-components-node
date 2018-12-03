@@ -105,14 +105,14 @@ const page = customElements.defineWithRender('home-page', class extends HTMLElem
         <h2>Interactive</h2>
 
         <div>
-          <select onchange="$homePage.stateSelectChange(this.value)">
+          <select onChange="$homePage.stateSelectChange(this.value)">
             <option value="" disabled ${this.selectedState === null ? 'selected' : ''}>State...</option>
             ${this.states.map(s => html`
               <option value="${s.name}" ${this.selectedState === s.name ? 'selected' : ''}>${s.name}</option>
             `).join('\n')}
           </select>
 
-          <select onchange="$homePage.citySelectChange(this.value)">
+          <select onChange="$homePage.citySelectChange(this.value)">
             <option value="" disabled ${this.selectedCity === null ? 'selected' : ''}>City...</option>
             ${this.cities.map(c => html`
               <option value="${c.name}" ${this.selectedCity === c.name ? 'selected' : ''}>${c.name}</option>
@@ -193,8 +193,8 @@ customElements.define('some-element', class extends HTMLElement {
 
 ```HTML
 <template id="someElement">
-  <!-- notice that we are using the template id to access the modthod on the HTMLElement class -->
-  <button onclick="someElement.someMethod()">the button</button>
+  <!-- notice that we are using the template id to access the method on the HTMLElement class -->
+  <button onClick="someElement.someMethod()">the button</button>
 </template>
 
 <some-element></some-element>
