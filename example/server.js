@@ -9,6 +9,7 @@ const PORT = process.env.PORT || 3001;
 setConfig({
   /*
    * default: 'template'
+   * The default method name for templates used by the template renderer
    */
   templateMethod: 'template',
 

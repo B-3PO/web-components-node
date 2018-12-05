@@ -31,6 +31,7 @@ const { setConfig } = require('customElementsNode')
 setConfig({
   /*
    * default: 'template'
+   * The default method name for templates used by the template renderer
    */
   templateMethod: 'template',
 
