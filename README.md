@@ -29,8 +29,24 @@ To create a set of tools that let you serve web-components from a server, Pre-re
 const { setConfig } = require('customElementsNode')
 
 setConfig({
-  // the method that is used for server-side rendering
-  templateMethod: 'template' // this is the default
+  /*
+   * default: 'template'
+   */
+  templateMethod: 'template',
+
+  /*
+   * default: true
+   * This will memoize certain methods to prevent unnecessary processing
+   * This is essantially equal to static file performance after the first request
+   */
+  memoize: true,
+
+  /*
+   * default: true
+   * This will minify the js in component script tags and the component tmeplate html
+   * This can help redice file size
+   */
+  minify: true
 });
 ```
 
@@ -141,7 +157,7 @@ async function buildPage() {
   const states = await getStates();
   return {
     title: 'Interactive',
-    body: page.template({ states })
+    body: page.build({ states })
   };
 };
 ```

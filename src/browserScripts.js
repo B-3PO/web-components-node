@@ -1,12 +1,17 @@
-const { includeComponentTemplatess, includeComponentScripts, includeComponents } = require('./componentRegistry')
+const uglifyJS = require('uglify-es');
+const config = require('./config');
+const { memoize } = require('./cache');
+const {
+  includeComponentTemplatess,
+  includeComponentScripts,
+  includeComponents
+} = require('./componentRegistry')
 
-exports.includeComponentTemplatess = includeComponentTemplatess;
-exports.includeComponentScripts = includeComponentScripts;
-exports.includeComponents = includeComponents;
-exports.include = () => {
+const includeMemoize = memoize(include);
+function include() {
   return `
     <script>
-      window.html = function (strings, ...expressionValues) {
+      ${uglifyJS.minify(`window.html = function (strings, ...expressionValues) {
         let finalString = '';
         let i = 0;
         let length = strings.length;
@@ -15,7 +20,12 @@ exports.include = () => {
           finalString += strings[i];
         }
         return finalString;
-      };
+      }`).code};
     </script>
   `;
-};
+}
+
+exports.includeComponentTemplatess = includeComponentTemplatess;
+exports.includeComponentScripts = includeComponentScripts;
+exports.includeComponents = includeComponents;
+exports.include = () => config.get('memoize') ? includeMemoize() : include();

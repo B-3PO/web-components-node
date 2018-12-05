@@ -43,6 +43,6 @@ module.exports = async () => {
 
   return {
     title: 'List',
-    body: page.template({ list })
+    body: page.build({ list })
   };
 };

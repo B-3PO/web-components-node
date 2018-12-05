@@ -47,9 +47,12 @@ const page = customElements.defineWithRender('home-page', class extends HTMLElem
   }
 });
 
+// this will prevent a tempalte from being generated
+page.renderTemplate = false;
+
 module.exports = async () => {
   return {
     title: 'List Client Render',
-    body: page.noTemplate()
+    body: page.build()
   };
 };

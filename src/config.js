@@ -1,5 +1,7 @@
 const config = {
-  templateMethod: 'template'
+  templateMethod: 'template',
+  memoize: true,
+  minify: true
 };
 
 exports.set = (params = {}) => {
@@ -8,4 +10,4 @@ exports.set = (params = {}) => {
   });
 };
 
-exports.get = () => config;
+exports.get = (name) => name !== undefined ? config[name] : config;

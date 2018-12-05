@@ -26,5 +26,5 @@ const page = customElements.define('home-page', class extends HTMLElement {
 
 module.exports = async () => ({
   title: 'Home',
-  body: page.template()
+  body: page.build()
 });

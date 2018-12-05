@@ -1,6 +1,9 @@
 const HTMLElement = require('./HTMLElement');
-const { get: getConfig } = require('./config');
+const config = require('./config');
 const { html } = require('common-tags');
+const minifyHTML = require('html-minifier').minify;
+const uglifyJS = require('uglify-es');
+const { memoize } = require('./cache');
 
 const hyphenCaseReg = /-\w/g;
 
@@ -37,10 +40,20 @@ class CustomElementsNode {
       .replace('super()', '');
     this.modifiedConstructor = eval('('+this.modifiedConstructorString+')');
     this.renderTemplate = true;
+
+    // setup global config
+    this.templateMethodName = config.get('templateMethod');
+    this.minify = config.get('minify');
+    if (config.get('memoize')) {
+      this.buildWithoutMemoize = this.build;
+      this.build = memoize(this.build.bind(this));
+    }
   }
 
   getClassAsString(hasTemplate) {
-    return `customElements.define("${this.name}",` + this.buildClientConstructorString(hasTemplate) + html`);`;
+    const classString = `customElements.define("${this.name}",` + this.buildClientConstructorString(hasTemplate) + html`);`;
+    if (this.minify) return uglifyJS.minify(classString).code;
+    else return classString;
   }
 
   getTemplateElementAsString(vm) {
@@ -54,17 +67,28 @@ class CustomElementsNode {
     }
     // add passed in data to class, this will make it accessible on "this"
     Object.assign(elementsClass, vm);
-    const templateMethodName = getConfig().templateMethod;
-    return `
+    console.log(this.templateMethodName)
+    const template = `
       <template id="${this.name}">
-        ${elementsClass[templateMethodName]()}
+        ${elementsClass[this.templateMethodName]()}
       </template>
     `;
+
+    if (!this.minify) return template;
+    else return minifyHTML(template, {
+      removeComments: true,
+      collapseWhitespace: true,
+      collapseBooleanAttributes: false,
+      removeAttributeQuotes: true,
+      removeEmptyAttributes: false,
+      minifyJS: false,
+      minifyCSS: true
+    });
   }
 
   build(vm) {
-    if (this.renderTemplate) return buildWithTemplate(vm);
-    else return buildWithoutTemplate();
+    if (this.renderTemplate) return this.buildWithTemplate(vm);
+    else return this.buildWithoutTemplate();
   }
 
   buildWithTemplate(vm = {}) {
@@ -80,16 +104,6 @@ class CustomElementsNode {
       <${this.name} id="$${toCamelCase(this.name)}"></${this.name}>
       <script>${this.getClassAsString()}</script>
     `;
-  }
-
-  // tODO remove
-  template(vm) {
-    return this.buildWithTemplate(vm);
-  }
-
-  // tODO remove
-  noTemplate() {
-    return this.buildWithoutTemplate();
   }
 
   buildClientConstructorString(hasTemplate = false) {
@@ -124,7 +138,7 @@ class CustomElementsNode {
       render() {
         ${hasPreRender ? 'this.preRender()' : ''}
         var templateElement = document.createElement('template');
-        templateElement.innerHTML = this.${getConfig().templateMethod}();
+        templateElement.innerHTML = this.${this.templateMethodName}();
         var clone = templateElement.content.cloneNode(true);
         var shadowRoot = this.shadowRoot ? this.shadowRoot : this.attachShadow({mode: 'open'});
         var shadowContentDiv = shadowRoot.querySelector('div#content');

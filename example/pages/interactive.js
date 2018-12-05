@@ -78,6 +78,6 @@ module.exports = async () => {
   const states = await getStates();
   return {
     title: 'Interactive',
-    body: page.template({ states })
+    body: page.build({ states })
   };
 };
