@@ -2,7 +2,6 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const path = require('path');
-const compression = require('compression');
 const app = express();
 const { setConfig } = require('../index');
 const PORT = process.env.PORT || 3001;
@@ -31,7 +30,6 @@ setConfig({
 
 app.use(morgan('dev'));
 app.use(bodyParser.json());
-app.use(compression());
 app.use('/assets', express.static(__dirname));
 
 app.use('/', require('./router'));
