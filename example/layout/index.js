@@ -4,6 +4,7 @@ const {
 } = require('../../index');
 const header = require('./header');
 const nav = require('./navigation');
+require('../components');
 
 module.exports = ({ body, title }) => html`
   <!DOCTYPE html>
@@ -17,6 +18,13 @@ module.exports = ({ body, title }) => html`
     </head>
 
     <body>
+      <!--
+        the includeComponents method is ment for development
+        It is better to package up the components using something like webpack
+        TODO add minification
+        TODO add component ssplitting based on the pages html
+      -->
+      ${browserScripts.includeComponents()}
       ${header({ title })}
       ${nav({ title })}
       ${body}

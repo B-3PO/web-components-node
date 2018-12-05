@@ -36,9 +36,14 @@ class CustomElementsNode {
       .replace('super();', '')
       .replace('super()', '');
     this.modifiedConstructor = eval('('+this.modifiedConstructorString+')');
+    this.renderTemplate = true;
   }
 
-  template(vm) {
+  getClassAsString(hasTemplate) {
+    return `customElements.define("${this.name}",` + this.buildClientConstructorString(hasTemplate) + html`);`;
+  }
+
+  getTemplateElementAsString(vm) {
     const elementsClass = new this.modifiedConstructor();
     if (this.hasOriginalConstructor) {
       try {
@@ -50,24 +55,41 @@ class CustomElementsNode {
     // add passed in data to class, this will make it accessible on "this"
     Object.assign(elementsClass, vm);
     const templateMethodName = getConfig().templateMethod;
-    return html`
+    return `
       <template id="${this.name}">
         ${elementsClass[templateMethodName]()}
       </template>
-      <${this.name} id="$${toCamelCase(this.name)}"></${this.name}>
-      <script>
-        customElements.define("${this.name}",` + this.buildClientConstructorString(true) + html`);
-      </script>
     `;
   }
 
-  noTemplate() {
+  build(vm) {
+    if (this.renderTemplate) return buildWithTemplate(vm);
+    else return buildWithoutTemplate();
+  }
+
+  buildWithTemplate(vm = {}) {
+    return html`
+      ${this.getTemplateElementAsString(vm)}
+      <${this.name} id="$${toCamelCase(this.name)}"></${this.name}>
+      <script>${this.getClassAsString(true)}</script>
+    `;
+  }
+
+  buildWithoutTemplate() {
     return html`
       <${this.name} id="$${toCamelCase(this.name)}"></${this.name}>
-      <script>
-        customElements.define("${this.name}",` + this.buildClientConstructorString() + html`);
-      </script>
+      <script>${this.getClassAsString()}</script>
     `;
+  }
+
+  // tODO remove
+  template(vm) {
+    return this.buildWithTemplate(vm);
+  }
+
+  // tODO remove
+  noTemplate() {
+    return this.buildWithoutTemplate();
   }
 
   buildClientConstructorString(hasTemplate = false) {
@@ -104,7 +126,7 @@ class CustomElementsNode {
         var templateElement = document.createElement('template');
         templateElement.innerHTML = this.${getConfig().templateMethod}();
         var clone = templateElement.content.cloneNode(true);
-        var shadowRoot = this.shadowRoot ? this.shadowRoot : this.attachShadow({mode: 'open'})
+        var shadowRoot = this.shadowRoot ? this.shadowRoot : this.attachShadow({mode: 'open'});
         var shadowContentDiv = shadowRoot.querySelector('div#content');
         if (!shadowContentDiv) shadowRoot.appendChild(clone);
         else shadowContentDiv.innerHTML = clone.querySelector('div#content').innerHTML;

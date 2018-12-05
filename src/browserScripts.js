@@ -1,3 +1,8 @@
+const { includeComponentTemplatess, includeComponentScripts, includeComponents } = require('./componentRegistry')
+
+exports.includeComponentTemplatess = includeComponentTemplatess;
+exports.includeComponentScripts = includeComponentScripts;
+exports.includeComponents = includeComponents;
 exports.include = () => {
   return `
     <script>

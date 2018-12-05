@@ -7,6 +7,7 @@ header > div {
   width: 100%;
   line-height: 54px;
   padding-left: 8px;
+  box-sizing: border-box;
   color: white;
   font-size: 18px;
   background-color: #00AEFF;
@@ -16,6 +17,7 @@ nav {
   width: 100%;
   line-height: 54px;
   padding-left: 8px;
+  box-sizing: border-box;
   font-size: 16px;
   background-color: #00AEFF;
 }

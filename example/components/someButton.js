@@ -1,12 +1,18 @@
+// This file in includes in ./index.js
+
 // basic page that uses server side rendering
 const {
   customElements,
   HTMLElement,
-  html
+  html,
+  registerComponent
 } = require('../../index');
 
 // https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_custom_elements#Autonomous_custom_elements
-const page = customElements.define('home-page', class extends HTMLElement {
+registerComponent(customElements.define('some-button', class extends HTMLElement {
+  connectedCallback() {
+    this.shadowRoot.querySelector('#button').addEventListener('click', this.onClick);
+  }
   /*
    * Template is a custom methods that is used for server side rendering and is not part of the customElements spec
    * You can change the template method
@@ -14,17 +20,11 @@ const page = customElements.define('home-page', class extends HTMLElement {
    */
   template() {
     return html`
-      <div id="content">
-        <h2>Home</h2>
-
-        <!-- this component is loaded via ../components -->
-        <some-button></some-button>
-      </div>
+      <button id="button">some button</button>
     `;
   }
-});
 
-module.exports = async () => ({
-  title: 'Home',
-  body: page.template()
-});
+  onClick() {
+    alert('clicked');
+  }
+}));
