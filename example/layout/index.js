@@ -19,10 +19,9 @@ module.exports = ({ body, title }) => html`
 
     <body>
       <!--
-        the includeComponents method is ment for development
-        It is better to package up the components using something like webpack
-        TODO add minification
-        TODO add component splitting based on the pages html
+        includeComponents method is ment for development
+
+        Recommended: package up the components using something like webpack
         TODO add method to allow compoennts to be served as a single js file
       -->
       ${browserScripts.includeComponents()}
