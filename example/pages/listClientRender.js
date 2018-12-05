@@ -1,5 +1,5 @@
 /*
- * fully interactive page
+ * dynamic template
  * Client side rendering only
  */
 const {
@@ -47,7 +47,7 @@ const page = customElements.defineWithRender('home-page', class extends HTMLElem
   }
 });
 
-// this will prevent a tempalte from being generated
+// this will prevent a template from being generated
 page.renderTemplate = false;
 
 module.exports = async () => {

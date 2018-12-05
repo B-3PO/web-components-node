@@ -1,5 +1,5 @@
 /*
- * fully interactive page
+ * dynamic template
  * Renders on serverside
  */
 const {
