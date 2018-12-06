@@ -1,12 +1,16 @@
 {
   "name": "web-components-node",
-  "version": "0.0.1-beta.2",
+  "version": "0.0.1-beta.3",
   "description": "",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
     "watch": "nodemon index.js",
     "example": "node example/server.js"
+  },
+  "repository": {
+    "type" : "git",
+    "url" : "https://github.com/B-3PO/web-components-node-website"
   },
   "author": "Ben Rubin",
   "license": "MIT",
