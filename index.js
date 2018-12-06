@@ -16,14 +16,3 @@ module.exports = {
   setConfig: set,
   registerComponent
 };
-
-
-(req, res) => {
-  work()
-    .then
-    .catch
-}
-
-async function work() {
-  return '';
-}
