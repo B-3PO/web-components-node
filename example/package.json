@@ -1,8 +1,8 @@
 {
-  "name": "customElementsNode-example",
+  "name": "web-components-node-example",
   "version": "0.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "watch": "nodemon server.js"
