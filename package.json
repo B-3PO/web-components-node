@@ -1,12 +1,11 @@
 {
-  "name": "customElementsNode",
-  "version": "0.0.0",
+  "name": "web-components-node",
+  "version": "0.0.1-beta.1",
   "description": "",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
     "watch": "nodemon index.js",
-    "test": "./node_modules/.bin/jest --forceExit",
     "example": "node example/server.js"
   },
   "author": "Ben Rubin",

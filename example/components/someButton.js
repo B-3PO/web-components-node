@@ -16,7 +16,7 @@ registerComponent(customElements.define('some-button', class extends HTMLElement
   /*
    * Template is a custom methods that is used for server side rendering and is not part of the customElements spec
    * You can change the template method
-   * https://github.com/B-3PO/customElementsNode#Config
+   * https://github.com/B-3PO/web-components-node#Config
    */
   template() {
     return html`

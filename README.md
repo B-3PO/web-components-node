@@ -10,9 +10,8 @@
 - [Why?](#Why?)
 
 # Note to all
-This project is in its early stages and is not well defined yet.
-It is fully functional but the interfaces may change.
-The name "customElementsNode" is also a working title and is subject to change
+This project is in its early stages
+web-components-node is fully functional but the interfaces may change
 
 # Introduction
 This project is meant to serve as a way to use web components in place of a framework. By no means is this meant to act as a replacement for frameworks (React, Angular, Vue, ...). If you are looking for something simple, performant, with server-side rendering support then this project may interest you.
@@ -26,7 +25,7 @@ To create a set of tools that let you serve web-components from a server, Pre-re
 
 # Config
 ```javascript
-const { setConfig } = require('customElementsNode')
+const { setConfig } = require('web-components-node')
 
 setConfig({
   /*
@@ -71,7 +70,7 @@ app.get('/home', async (req, res) => {
 const {
   browserScripts,
   html
-} = require('customElementsNode');
+} = require('web-components-node');
 
 function pageTemplate({ title, body }) {
   return html`
@@ -96,7 +95,7 @@ const {
   customElements,
   HTMLElement,
   html
-} = require('customElementsNode');
+} = require('web-components-node');
 const { getStates } = require('../services/states');
 
 
