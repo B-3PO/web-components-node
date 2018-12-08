@@ -7,4 +7,7 @@
  */
 module.exports = class HTMLElement {
   attachShadow() {}
+  hasAttribute() {}
+  getAttribute() {}
+  setAttribute() {}
 };

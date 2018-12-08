@@ -20,16 +20,17 @@ function includeComponentTemplates() {
   return Object.keys(components).map(key => components[key].getTemplateElementAsString()).join('\n');
 }
 
-function includeComponentScripts() {
+function includeComponentScripts(hasTemplate) {
   return `
     <script>
-      ${Object.keys(components).map(key => components[key].getClassAsString(true)).join('\n')}
+      ${Object.keys(components).map(key => components[key].getClassAsString(hasTemplate)).join('\n')}
     </script>
   `;
 }
 
 function includeComponents() {
-  return `${exports.includeComponentTemplates()}\n${exports.includeComponentScripts()}`;
+  const template = exports.includeComponentTemplates();
+  return `${template}\n${exports.includeComponentScripts(!!template)}`;
 }
 
 

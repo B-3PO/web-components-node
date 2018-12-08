@@ -1,7 +1,7 @@
 {
   "name": "web-components-node",
   "version": "0.0.1-beta.4",
-  "description": "",
+  "description": "Build, render and serve web-components",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",

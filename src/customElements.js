@@ -74,6 +74,10 @@ class CustomElementsNode {
   getTemplateElementAsString(vm) {
     // add passed in data to class. We want to make it accessible on "this"
     const elementsClass = new this.modifiedConstructor();
+    
+    // return if there is no template method
+    if (!elementsClass[this.templateMethodName]) return '';
+
     if (this.hasOriginalConstructor) {
       try {
         elementsClass.constructor_original();
