@@ -10,7 +10,7 @@ const {
 const { getList } = require('../services/list');
 
 // https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_custom_elements#Autonomous_custom_elements
-const page = customElements.defineWithRender('home-page', class extends HTMLElement {
+const page = customElements.exportWithRender('home-page', class extends HTMLElement {
   constructor() {
     super();
     this.list = [];

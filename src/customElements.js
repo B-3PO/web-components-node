@@ -12,12 +12,52 @@ const { html } = require('common-tags');
 const minifyHTML = require('html-minifier').minify;
 const uglifyJS = require('uglify-es');
 const { memoize } = require('./cache');
+const { registerComponent } = require('./componentRegistry');
 
 const hyphenCaseReg = /-\w/g;
 
 module.exports = {
   // https://developer.mozilla.org/en-US/docs/Web/API/CustomElementRegistry/define
-  define(name, constructor, options) {
+  // This will be included with the components packed for the client
+  define(name, constructor, options = {}) {
+    options._registered = true;
+    const ce = new CustomElementsNode(name, constructor, options);
+    registerComponent(ce);
+    return ce
+  },
+
+  /*
+   * This is a custom method for adding in a `render` method
+   * This will make it so you can use a single template method to render on the server and browser
+   * you can always implament your own render method
+   *
+   * This will be included with the components packed for the client
+   */
+  defineWithRender(name, constructor, options = {}) {
+    options._registered = true;
+    options._addRenderMethod = true;
+
+    // validate template
+    // we need to make sure there is a <div id="content"> container
+    // TODO probably want to change the div id or use a custom tag
+    const tempClass = new constructor();
+    const tempTemplate = tempClass.template();
+    if (!tempTemplate.includes('id="content"')) {
+      throw Error('defineWithRender requires a container with id="content" (<div id="content"><!-- body here --></div>)');
+    }
+
+    const ce = new CustomElementsNode(name, constructor, options);
+    registerComponent(ce);
+    return ce
+  },
+
+  /*
+   * This is a custom method for creatin en exportable element
+   * The main purpose i to allow you to create a page that is packaged for the client
+   *
+   * This will NOT be included with the components packed for the client
+   */
+  export(name, constructor, options) {
     return new CustomElementsNode(name, constructor, options);
   },
 
@@ -25,8 +65,10 @@ module.exports = {
    * This is a custom method for adding in a `render` method
    * This will make it so you can use a single template method to render on the server and browser
    * you can always implament your own render method
+   *
+   * This will NOT be included with the components packed for the client
    */
-  defineWithRender(name, constructor, options = {}) {
+  exportWithRender(name, constructor, options = {}) {
     options._addRenderMethod = true;
 
     // validate template
@@ -74,7 +116,7 @@ class CustomElementsNode {
   getTemplateElementAsString(vm) {
     // add passed in data to class. We want to make it accessible on "this"
     const elementsClass = new this.modifiedConstructor();
-    
+
     // return if there is no template method
     if (!elementsClass[this.templateMethodName]) return '';
 
