@@ -6,9 +6,16 @@
  * This will allow you us to run the classes in node
  */
 module.exports = class HTMLElement {
-  attachShadow() {}
+  attachShadow() {
+    this.shadowRoot = new ShadowRoot();
+  }
   hasAttribute() {}
   getAttribute() {}
   setAttribute() {}
   removeAttribute() {}
 };
+
+
+class ShadowRoot {
+  innerHTML() {}
+}

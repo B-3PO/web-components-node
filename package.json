@@ -9,8 +9,8 @@
     "example": "node example/server.js"
   },
   "repository": {
-    "type" : "git",
-    "url" : "https://github.com/B-3PO/web-components-node"
+    "type": "git",
+    "url": "https://github.com/B-3PO/web-components-node"
   },
   "author": "Ben Rubin",
   "license": "MIT",
