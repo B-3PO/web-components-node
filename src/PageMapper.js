@@ -23,7 +23,9 @@ module.exports = class PageMapper {
   }
 
   findPage(url) {
-    return this.modules[url.replace(slash_REG, '')] || this._404 || noop;
+    const module = this.modules[url.replace(slash_REG, '')];
+    if (typeof module !== 'function') return this._404 || noop;
+    return this.modules[url.replace(slash_REG, '')];
   }
 
   set 404(url) {
