@@ -5,7 +5,8 @@ const { PageMapper } = require('../index');
 const pageMapper = new PageMapper('example/pages');
 const { getList } = require('./services/list');
 const { getStates } = require('./services/states');
-
+pageMapper.pageNotFount = '404'; // file name
+pageMapper.root = 'home'; // file to load when user go to root '/'
 
 // api router
 router.get('/api/list', (_req, res) => {
