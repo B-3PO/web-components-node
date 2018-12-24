@@ -26,7 +26,13 @@ setConfig({
    * This will minify the js in component script tags and the component tmeplate html
    * This can help redice file size
    */
-  minify: true
+  minify: true,
+
+  /*
+   * default: true
+   * user built in service worker to manage cache
+   */
+  serviceWorker: false
 });
 
 app.use(morgan('dev'));

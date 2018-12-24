@@ -18,7 +18,13 @@ const config = {
    * This will minify the js in component script tags and the component tmeplate html
    * This can help redice file size
    */
-  minify: true
+  minify: true,
+
+  /*
+   * default: true
+   * user built in service worker to manage cache
+   */
+  serviceWorker: true
 };
 
 exports.get = (name) => name !== undefined ? config[name] : config;

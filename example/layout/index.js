@@ -1,5 +1,5 @@
 const {
-  browserScripts,
+  inject,
   html
 } = require('../../index');
 const header = require('./header');
@@ -14,7 +14,7 @@ module.exports = ({ body, title }) => html`
       <meta http-equiv="Cache-Control" content="no-store" />
       <link rel="stylesheet" href="/assets/main.css">
       <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-      ${browserScripts.include()}
+      ${inject.scripts()}
     </head>
 
     <body>
@@ -24,7 +24,7 @@ module.exports = ({ body, title }) => html`
         Recommended: package up the components using something like webpack
         TODO add method to allow compoennts to be served as a single js file
       -->
-      ${browserScripts.includeComponents()}
+      ${inject.components()}
       ${header({ title })}
       ${nav({ title })}
       ${body}
