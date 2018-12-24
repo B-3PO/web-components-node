@@ -9,17 +9,18 @@ function includeComponentTemplates() {
   return Object.keys(components).map(key => components[key].getTemplateElementAsString()).join('\n');
 }
 
-function includeComponentScripts(hasTemplate) {
+function includeComponentScripts() {
   return `
     <script>
-      ${Object.keys(components).map(key => components[key].getClassAsString(hasTemplate)).join('\n')}
+      ${Object.keys(components).map(key => {
+        return components[key].getClassAsString(!!components[key].getTemplateElementAsString())
+      }).join('\n')}
     </script>
   `;
 }
 
 exports.includeComponents = () => {
-  const template = includeComponentTemplates();
-  return `${template}\n${includeComponentScripts(!!template)}`;
+  return `${includeComponentTemplates()}\n${includeComponentScripts()}`;
 };
 
 // Method for registering components
