@@ -4,22 +4,22 @@ const { includeComponents } = require('./componentRegistry');
 const includeComponentsMemoized = memoize(includeComponents);
 const fs = require('fs');
 const path = require('path');
-const main = fs.readFileSync(path.join(__dirname, '../public/main.js'), 'utf8');
-const serviceWorker = fs.readFileSync(path.join(__dirname, '../public/service-worker-laoder.js'), 'utf8');
+const main = require('./client-files/main.js');
+const serviceWorker = require('./client-files/service-worker-laoder.js');
 
 const buildScriptsMemoize = memoize(buildScripts);
-function buildScripts() {
+function buildScripts(params) {
   return `
 <script>
-  ${main}
-  ${config.get('serviceWorker') ? serviceWorker : ''}
+  ${main(params)}
+  ${config.get('serviceWorker') ? serviceWorker(params) : ''}
 </script>
   `;
 }
 
 module.exports = {
-  scripts() {
-    return config.get('memoize') ? buildScriptsMemoize() : buildScripts();
+  scripts(params = {}) {
+    return config.get('memoize') ? buildScriptsMemoize(params) : buildScripts(params);
   },
 
   components() {
