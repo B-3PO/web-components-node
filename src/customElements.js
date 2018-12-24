@@ -188,7 +188,7 @@ class CustomElementsNode {
       removeEmptyAttributes: false,
       minifyJS: false,
       minifyCSS: true
-    }) : elementsClass[this.templateMethodName]()}
+    }) : elementsClass[this.templateMethodName]()}';
   document.body.insertAdjacentElement('beforeend', t);
 }());`;
   }
