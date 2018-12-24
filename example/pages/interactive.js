@@ -38,7 +38,7 @@ const page = customElements.exportWithRender('home-page', class extends HTMLElem
    */
   template() {
     return html`
-      <div id="content">
+      <render-block>
         <h2>Interactive</h2>
 
         <div>
@@ -56,7 +56,7 @@ const page = customElements.exportWithRender('home-page', class extends HTMLElem
             `).join('\n')}
           </select>
         </div>
-      </div>
+      </render-block>
     `;
   }
 

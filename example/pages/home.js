@@ -14,12 +14,14 @@ const page = customElements.export('home-page', class extends HTMLElement {
    */
   template() {
     return html`
-      <div id="content">
-        <h2>Home</h2>
+      <style>
+        <!-- add css here -->
+      </style>
 
-        <!-- this component is loaded via ../components -->
-        <some-button></some-button>
-      </div>
+      <h2>Home</h2>
+
+      <!-- this component is loaded via ../components -->
+      <some-button></some-button>
     `;
   }
 });

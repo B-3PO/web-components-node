@@ -23,7 +23,7 @@ const page = customElements.exportWithRender('home-page', class extends HTMLElem
    */
   template() {
     return html`
-      <div id="content">
+      <render-block>
         <h2>List</h2>
 
         <div>
@@ -33,7 +33,7 @@ const page = customElements.exportWithRender('home-page', class extends HTMLElem
             `).join('\n')}
           </ul>
         </div>
-      </div>
+      </render-block>
     `;
   }
 });

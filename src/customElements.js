@@ -20,6 +20,7 @@ module.exports = {
   // https://developer.mozilla.org/en-US/docs/Web/API/CustomElementRegistry/define
   // This will be included with the components packed for the client
   define(name, constructor, options = {}) {
+    // TODO add name validation
     options._registered = true;
     const ce = new CustomElementsNode(name, constructor, options);
     registerComponent(ce);
@@ -42,8 +43,8 @@ module.exports = {
     // TODO probably want to change the div id or use a custom tag
     const tempClass = new constructor();
     const tempTemplate = tempClass.template();
-    if (!tempTemplate.includes('id="content"')) {
-      throw Error('defineWithRender requires a container with id="content" (<div id="content"><!-- body here --></div>)');
+    if (!tempTemplate.includes('<render-block>')) {
+      throw Error('defineWithRender requires a <render-block> (<render-block><!-- body here --></render-block>)');
     }
 
     const ce = new CustomElementsNode(name, constructor, options);
@@ -76,8 +77,8 @@ module.exports = {
     // TODO probably want to change the div id or use a custom tag
     const tempClass = new constructor();
     const tempTemplate = tempClass.template();
-    if (!tempTemplate.includes('id="content"')) {
-      throw Error('defineWithRender requires a container with id="content" (<div id="content"><!-- body here --></div>)');
+    if (!tempTemplate.includes('<render-block>')) {
+      throw Error('defineWithRender requires a <render-block> (<render-block><!-- body here --></render-block>)');
     }
     return new CustomElementsNode(name, constructor, options);
   }
@@ -101,8 +102,11 @@ class CustomElementsNode {
     // setup global config
     this.templateMethodName = config.get('templateMethod');
     this.minify = config.get('minify');
-    this.buildWithoutMemoize = this.build; // provide a way to not memoize specific methods
-    if (config.get('memoize')) this.build = memoize(this.build.bind(this));
+    this.memoize = config.get('memoize');
+    this.buildWithTemplateNoMemoize = this.buildWithTemplate; // provide a way to not memoize specific methods
+    if (this.memoize) this.buildWithTemplate = memoize(this.buildWithTemplate.bind(this));
+    this.buildWithoutTemplateNoMemoize = this.buildWithoutTemplate; // provide a way to not memoize specific methods
+    if (this.memoize) this.buildWithoutTemplate = memoize(this.buildWithoutTemplate.bind(this));
   }
 
   // Internally used method
@@ -148,9 +152,14 @@ class CustomElementsNode {
   }
 
   // the suggested method to run serverside
-  build(vm) {
-    if (this.renderTemplate) return this.buildWithTemplate(vm);
-    else return this.buildWithoutTemplate();
+  build(vm, options = {}) {
+    if (options.renderTemplate || this.renderTemplate) {
+      if (options.memoize === false || this.memoize === false) return this.buildWithTemplateNoMemoize(vm);
+      return this.buildWithTemplate(vm);
+    } else {
+      if (options.memoize === false || this.memoize === false) return this.buildWithoutTemplateNoMemoize();
+      return this.buildWithoutTemplate();
+    }
   }
 
   // build just the template element
@@ -197,8 +206,8 @@ class CustomElementsNode {
     if (this.modifiedConstructorString.indexOf('template(') === -1) {
       throw Error('expected `template` method');
     }
-    if (this.modifiedConstructorString.indexOf('id="content"') === -1) {
-      throw Error('expected `<div id="content">` wrapper for all html content in template');
+    if (this.modifiedConstructorString.indexOf('<render-block>') === -1) {
+      throw Error('expected `<render-block>` wrapper for all html content in template');
     }
     const hasPreRender = this.modifiedConstructorString.indexOf('preRender(') > 0;
     const hasPostRender = this.modifiedConstructorString.indexOf('postRender(') > 0;
@@ -209,9 +218,9 @@ class CustomElementsNode {
         templateElement.innerHTML = this.${this.templateMethodName}();
         var clone = templateElement.content.cloneNode(true);
         var shadowRoot = this.shadowRoot ? this.shadowRoot : this.attachShadow({mode: 'open'});
-        var shadowContentDiv = shadowRoot.querySelector('div#content');
+        var shadowContentDiv = shadowRoot.querySelector('render-block');
         if (!shadowContentDiv) shadowRoot.appendChild(clone);
-        else shadowContentDiv.innerHTML = clone.querySelector('div#content').innerHTML;
+        else shadowContentDiv.innerHTML = clone.querySelector('render-block').innerHTML;
         ${hasPostRender ? 'this.postRender()' : ''}
       }
     `;
