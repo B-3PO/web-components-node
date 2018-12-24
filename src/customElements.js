@@ -91,6 +91,7 @@ class CustomElementsNode {
     this.constructor = constructor;
     this.options = options;
     this.hasOriginalConstructor = constructor.toString().indexOf('constructor(') > 0;
+    this.hasTemplate = constructor.toString().indexOf('template(') > 0;
     // rename constructor so we can add our own with some injected code
     this.modifiedConstructorString = constructor.toString()
       .replace('constructor(', 'constructor_original(')
@@ -110,15 +111,21 @@ class CustomElementsNode {
   }
 
   // Internally used method
-  getClassAsString(hasTemplate) {
-    const classString = `customElements.define("${this.name}",` + this.buildClientConstructorString(hasTemplate) + html`);`;
+  getClassAsString(options) {
+    const classString = `customElements.define("${this.name}",` + this.buildClientConstructorString(options) + html`);`;
     if (this.minify) return uglifyJS.minify(classString).code;
     else return classString;
   }
 
+  getExternalCSS() {
+    const elementsClass = new this.modifiedConstructor();
+    // return if there is no externalCSS method
+    if (!elementsClass.externalCSS) return '';
+    return elementsClass.externalCSS();
+  }
+
   // Internally used method
   getTemplateElementAsString(vm) {
-    // add passed in data to class. We want to make it accessible on "this"
     const elementsClass = new this.modifiedConstructor();
 
     // return if there is no template method
@@ -151,6 +158,41 @@ class CustomElementsNode {
     });
   }
 
+  // Internally used method
+  getTemplateElementAsIIFE(vm) {
+
+    // add passed in data to class. We want to make it accessible on "this"
+    const elementsClass = new this.modifiedConstructor();
+
+    // return if there is no template method
+    if (!elementsClass[this.templateMethodName]) return '';
+
+    if (this.hasOriginalConstructor) {
+      try {
+        elementsClass.constructor_original();
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    Object.assign(elementsClass, vm);
+
+    return `(function(){
+  var t=document.createElement('template');
+  t.setAttribute('id','${this.name}');
+  t.innerHTML='${this.minify ?
+    minifyHTML(elementsClass[this.templateMethodName](), {
+      removeComments: true,
+      collapseWhitespace: true,
+      collapseBooleanAttributes: false,
+      removeAttributeQuotes: true,
+      removeEmptyAttributes: false,
+      minifyJS: false,
+      minifyCSS: true
+    }) : elementsClass[this.templateMethodName]()}
+  document.body.insertAdjacentElement('beforeend', t);
+}());`;
+  }
+
   // the suggested method to run serverside
   build(vm, options = {}) {
     if (options.renderTemplate || this.renderTemplate) {
@@ -179,7 +221,7 @@ class CustomElementsNode {
     `;
   }
 
-  buildClientConstructorString(hasTemplate = false) {
+  buildClientConstructorString(options = {}) {
     // This is injected if a tempalte is created server side
     const templateCloner = `
       var template = document.getElementById('${this.name}');
@@ -195,7 +237,7 @@ class CustomElementsNode {
     constructor() {
       super();
       ${this.hasOriginalConstructor ? 'this.constructor_original();' : ''}
-      ${hasTemplate ? templateCloner : ''}
+      ${(options.renderTemplate !== false && this.hasTemplate) ? templateCloner : ''}
     }
     `;
     const pos = this.modifiedConstructorString.indexOf('{') + 1;

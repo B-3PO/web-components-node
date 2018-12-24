@@ -13,7 +13,7 @@ function includeComponentScripts() {
   return `
     <script>
       ${Object.keys(components).map(key => {
-        return components[key].getClassAsString(!!components[key].getTemplateElementAsString())
+        return components[key].getClassAsString()
       }).join('\n')}
     </script>
   `;
@@ -22,6 +22,25 @@ function includeComponentScripts() {
 exports.includeComponents = () => {
   return `${includeComponentTemplates()}\n${includeComponentScripts()}`;
 };
+
+exports.staticFile = () => `
+document.addEventListener("DOMContentLoaded", function (event) {
+  ${Object
+    .keys(components)
+    .map(key => components[key].getTemplateElementAsIIFE())
+    .join('\n')}
+
+  ${Object
+    .keys(components)
+    .map(key => components[key].getClassAsString())
+    .join('\n')}
+});
+`;
+
+exports.staticComponentCSS = () => Object
+  .keys(components)
+  .map(key => components[key].getExternalCSS())
+  .join('\n');
 
 // Method for registering components
 // This should not be used for pages
