@@ -27,3 +27,8 @@ function getMime(file) {
   if (file.includes('.html')) return 'text/html';
   return 'text/plain';
 }
+
+
+exports.getJavascript = () => {
+  
+}
