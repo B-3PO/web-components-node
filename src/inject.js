@@ -5,7 +5,7 @@ const includeComponentsMemoized = memoize(includeComponents);
 const fs = require('fs');
 const path = require('path');
 const main = require('./client-files/main.js');
-const serviceWorker = require('./client-files/service-worker-laoder.js');
+const serviceWorker = require('./client-files/service-worker-loader.js');
 
 const buildScriptsMemoize = memoize(buildScripts);
 function buildScripts(params) {

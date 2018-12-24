@@ -1,6 +1,6 @@
 const files = {
   main: require('./main.js'),
-  serviceWorkerLaoder: require('./service-worker-laoder'),
+  serviceWorkerLoader: require('./service-worker-loader'),
   serviceWorker: require('./service-worker')
 };
 const reg = /-([a-z])/g;

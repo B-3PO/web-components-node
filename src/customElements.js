@@ -188,6 +188,8 @@ class CustomElementsNode {
       shadowRoot.appendChild(templateContent.cloneNode(true));
     `;
 
+    // TODO check if user is alreader cloning there template
+    // TODO add option to not automatically clone template
     // This is injected to allow a template cloner to be used
     const newConstructor = `
     constructor() {
