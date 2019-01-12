@@ -6,6 +6,10 @@
  * This will allow you us to run the classes in node
  */
 module.exports = class HTMLElement {
+  constructor() {
+    this.style = {};
+  }
+  appendChild() {}
   attachShadow() {
     this.shadowRoot = new ShadowRoot();
   }
@@ -13,8 +17,14 @@ module.exports = class HTMLElement {
   getAttribute() {}
   setAttribute() {}
   removeAttribute() {}
+  addEventListener() {}
+  removeEventListener() {}
+  getAttribute() {
+    return '';
+  }
+  hasAttribute() {}
+  setAttribute() {}
 };
-
 
 class ShadowRoot {
   innerHTML() {}

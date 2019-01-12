@@ -7,6 +7,8 @@
  */
 
 const HTMLElement = require('./HTMLElement');
+const Document = require('./Document');
+const document = new Document();
 const config = require('./config');
 const { html } = require('common-tags');
 const minifyHTML = require('html-minifier').minify;
@@ -58,7 +60,8 @@ module.exports = {
    *
    * This will NOT be included with the components packed for the client
    */
-  export(name, constructor, options) {
+  export(name, constructor, options = {}) {
+    options._exported = true;
     return new CustomElementsNode(name, constructor, options);
   },
 
@@ -70,6 +73,7 @@ module.exports = {
    * This will NOT be included with the components packed for the client
    */
   exportWithRender(name, constructor, options = {}) {
+    options._exported = true;
     options._addRenderMethod = true;
 
     // validate template
@@ -87,6 +91,7 @@ module.exports = {
 class CustomElementsNode {
   // TODO make this funtion campatable with transpiled code. Currently it will not work
   constructor(name, constructor, options = {}) {
+    this._exported = options._exported;
     this.name = name;
     this.constructor = constructor;
     this.options = options;
@@ -126,75 +131,50 @@ class CustomElementsNode {
 
   // Internally used method
   getTemplateElementAsString(vm) {
-    const elementsClass = new this.modifiedConstructor();
-
-    // return if there is no template method
-    if (!elementsClass[this.templateMethodName]) return '';
-
-    if (this.hasOriginalConstructor) {
-      try {
-        elementsClass.constructor_original();
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    Object.assign(elementsClass, vm);
-
-    const template = `
+    return `
       <template id="${this.name}">
-        ${elementsClass[this.templateMethodName]()}
+        ${this._elementTemplate(vm)}
       </template>
     `;
 
-    if (!this.minify) return template;
-    else return minifyHTML(template, {
-      removeComments: true,
-      collapseWhitespace: true,
-      collapseBooleanAttributes: false,
-      removeAttributeQuotes: true,
-      removeEmptyAttributes: false,
-      minifyJS: false,
-      minifyCSS: true
-    });
+    // TODO figure out where i should implement this
+    // if (!this.minify) return template;
+    // else return minifyHTML(template, {
+    //   removeComments: true,
+    //   collapseWhitespace: true,
+    //   collapseBooleanAttributes: false,
+    //   removeAttributeQuotes: true,
+    //   removeEmptyAttributes: false,
+    //   minifyJS: false,
+    //   minifyCSS: true
+    // });
   }
 
   // Internally used method
   getTemplateElementAsIIFE(vm) {
-
-    // add passed in data to class. We want to make it accessible on "this"
-    const elementsClass = new this.modifiedConstructor();
-
-    // return if there is no template method
-    if (!elementsClass[this.templateMethodName]) return '';
-
-    if (this.hasOriginalConstructor) {
-      try {
-        elementsClass.constructor_original();
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    Object.assign(elementsClass, vm);
-
     return `(function(){
   var t=document.createElement('template');
   t.setAttribute('id','${this.name}');
-  t.innerHTML='${this.minify ?
-    minifyHTML(elementsClass[this.templateMethodName](), {
-      removeComments: true,
-      collapseWhitespace: true,
-      collapseBooleanAttributes: false,
-      removeAttributeQuotes: true,
-      removeEmptyAttributes: false,
-      minifyJS: false,
-      minifyCSS: true
-    }) : elementsClass[this.templateMethodName]()}';
+  t.innerHTML=\`${this._elementTemplate(vm)}\`;
   document.body.insertAdjacentElement('beforeend', t);
 }());`;
+
+// TODO figure out where to minify
+// t.innerHTML='${this.minify ?
+//   minifyHTML(this._elementTemplate(vm), {
+//     removeComments: true,
+//     collapseWhitespace: true,
+//     collapseBooleanAttributes: false,
+//     removeAttributeQuotes: true,
+//     removeEmptyAttributes: false,
+//     minifyJS: false,
+//     minifyCSS: true
+//   }) : this._elementTemplate(vm)}';
   }
 
   // the suggested method to run serverside
   build(vm, options = {}) {
+    if (this._exported) return this.buildStaticHTML(vm);
     if (options.renderTemplate || this.renderTemplate) {
       if (options.memoize === false || this.memoize === false) return this.buildWithTemplateNoMemoize(vm);
       return this.buildWithTemplate(vm);
@@ -202,6 +182,30 @@ class CustomElementsNode {
       if (options.memoize === false || this.memoize === false) return this.buildWithoutTemplateNoMemoize();
       return this.buildWithoutTemplate();
     }
+  }
+
+  /* expoerted componetes are slotted
+   * this makes pages renderfaster and provides html the can be parsed
+   */
+  buildStaticHTML(vm = {}) {
+    const template = this._elementTemplate(vm);
+    return html`
+    <template id="${this.name}">
+      <slot></slot>
+    </template>
+    <${this.name} id="$${toCamelCase(this.name)}">
+      ${template}
+    </${this.name}>
+    <script>${this.getClassAsString(true)}</script>
+    `;
+  }
+
+  extractCSS(template) {
+    return template.match(/<style>[^]*?<\/style>/g).map(str => str.replace(/<\/?style>/g,'')).join('\n');
+  }
+
+  extractNonCSS(template) {
+    return template.replace(/<style>[^]*?<\/style>/g, '');
   }
 
   // build just the template element
@@ -239,7 +243,12 @@ class CustomElementsNode {
       ${this.hasOriginalConstructor ? 'this.constructor_original();' : ''}
       ${(options.renderTemplate !== false && this.hasTemplate) ? templateCloner : ''}
     }
+
+    get renderBlock() {
+      return ${this._exported ? 'this.shadowRoot.querySelector("slot").assignedNodes().find(n => n.nodeName === "RENDER-BLOCK")' : 'this.shadowRoot.querySelector("render-block")'};
+    }
     `;
+
     const pos = this.modifiedConstructorString.indexOf('{') + 1;
     if (this.options._addRenderMethod) return [this.modifiedConstructorString.slice(0, pos), newConstructor, this.buildRenderMethod(), this.modifiedConstructorString.slice(pos)].join('');
     return [this.modifiedConstructorString.slice(0, pos), newConstructor, this.modifiedConstructorString.slice(pos)].join('');
@@ -268,6 +277,30 @@ class CustomElementsNode {
         ${hasPostRender ? 'this.postRender()' : ''}
       }
     `;
+  }
+
+
+  // --- PRIVATE ----------------------------------------
+
+  // TODO use this in other functions
+  _ElementClassInstance(vm = {}) {
+    const elementsClass = new this.modifiedConstructor();
+    if (this.hasOriginalConstructor) {
+      try {
+        elementsClass.constructor_original();
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    Object.assign(elementsClass, vm);
+    return elementsClass;
+  }
+  // TODO use this in other functions
+  _elementTemplate(vm) {
+    const elementClass = this._ElementClassInstance(vm);
+    // return if there is no template method
+    if (!elementClass[this.templateMethodName]) return '';
+    return elementClass[this.templateMethodName]();
   }
 };
 
