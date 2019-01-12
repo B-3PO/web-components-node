@@ -57,7 +57,7 @@ setConfig({
 ```
 
 # Example:
-For a full example take a look at the example folder.
+For a full example take a look at the documentation site [github](https://github.com/B-3PO/web-components-node-website)
 ```bash
   # run example locally
   # clone the repo
@@ -68,6 +68,8 @@ For a full example take a look at the example folder.
 This is a short example of serving a page from an Expess server that can re-render on the font end. This example assumes you have previous knowledge of Node+Expressjs
 ```javascript
 // express endpoint
+const { fileHandler } = require('web-components-node');
+app.use(fileHandler.expressFileHandler);
 app.get('/home', async (req, res) => {
   res.send(pageTemplate(await buildPage()))
 });
@@ -78,7 +80,7 @@ const {
   html
 } = require('web-components-node');
 
-function pageTemplate({ title, body }) {
+function pageTemplate({ title, head, body }) {
   return html`
   <!DOCTYPE html>
   <html lang="en">
@@ -86,7 +88,9 @@ function pageTemplate({ title, body }) {
       <title>${title}</title>
       <meta http-equiv="Cache-Control" content="no-store" />
       <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-      ${browserScripts.include()}
+      <link rel="stylesheet" href="/wcn.css">
+      <script src="/wcn.js"></script>
+      ${head}
     </head>
 
     <body>
@@ -161,10 +165,7 @@ const page = customElements.defineWithRender('home-page', class extends HTMLElem
 
 async function buildPage() {
   const states = await getStates();
-  return {
-    title: 'Interactive',
-    body: page.build({ states })
-  };
+  return page.build({ states }); // { title, body, head }
 };
 ```
 

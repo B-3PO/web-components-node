@@ -77,8 +77,7 @@ module.exports = {
     options._addRenderMethod = true;
 
     // validate template
-    // we need to make sure there is a <div id="content"> container
-    // TODO probably want to change the div id or use a custom tag
+    // we need to make sure there is a <render-block> container
     const tempClass = new constructor();
     const tempTemplate = tempClass.template();
     if (!tempTemplate.includes('<render-block>')) {
@@ -107,19 +106,15 @@ class CustomElementsNode {
 
     // setup global config
     this.templateMethodName = config.get('templateMethod');
-    this.minify = config.get('minify');
-    this.memoize = config.get('memoize');
-    this.buildWithTemplateNoMemoize = this.buildWithTemplate; // provide a way to not memoize specific methods
-    if (this.memoize) this.buildWithTemplate = memoize(this.buildWithTemplate.bind(this));
-    this.buildWithoutTemplateNoMemoize = this.buildWithoutTemplate; // provide a way to not memoize specific methods
-    if (this.memoize) this.buildWithoutTemplate = memoize(this.buildWithoutTemplate.bind(this));
+    // this.minify = config.get('minify');
+    // this.memoize = config.get('memoize');
   }
 
   // Internally used method
   getClassAsString(options) {
     const classString = `customElements.define("${this.name}",` + this.buildClientConstructorString(options) + html`);`;
-    if (this.minify) return uglifyJS.minify(classString).code;
-    else return classString;
+    // if (this.minify) return uglifyJS.minify(classString).code;
+    return classString;
   }
 
   getExternalCSS() {
@@ -131,8 +126,11 @@ class CustomElementsNode {
 
   // Internally used method
   getTemplateElementAsString(vm) {
-    return `
+    return`
       <template id="${this.name}">
+        <style>
+          @import 'wcn.css';
+        </style>
         ${this._elementTemplate(vm)}
       </template>
     `;
@@ -173,56 +171,43 @@ class CustomElementsNode {
   }
 
   // the suggested method to run serverside
-  build(vm, options = {}) {
-    if (this._exported) return this.buildStaticHTML(vm);
-    if (options.renderTemplate || this.renderTemplate) {
-      if (options.memoize === false || this.memoize === false) return this.buildWithTemplateNoMemoize(vm);
-      return this.buildWithTemplate(vm);
-    } else {
-      if (options.memoize === false || this.memoize === false) return this.buildWithoutTemplateNoMemoize();
-      return this.buildWithoutTemplate();
-    }
-  }
-
-  /* expoerted componetes are slotted
-   * this makes pages renderfaster and provides html the can be parsed
-   */
-  buildStaticHTML(vm = {}) {
+  build(vm = {}) {
     const template = this._elementTemplate(vm);
-    return html`
-    <template id="${this.name}">
-      <slot></slot>
-    </template>
-    <${this.name} id="$${toCamelCase(this.name)}">
-      ${template}
-    </${this.name}>
-    <script>${this.getClassAsString(true)}</script>
-    `;
-  }
+    return {
+      title: 'title',
+      body: `
+        ${this.getTemplateElementAsString(vm)}
+        <pre-rendered>
+          ${template}
+        </pre-rendered>
+      `,
+      head: `
+        <script>
+          // wait for page to bee ready
+          setTimeout(() => {
+            ${this.getClassAsString(true)}
+            const el = document.createElement("${this.name}");
+            el.id = "$${toCamelCase(this.name)}";
+            el.style = 'display: block; height: 0; overflow: hidden;';
+            const preRendered = document.querySelector('pre-rendered');
+            if (preRendered) {
+              preRendered.parentNode.insertBefore(el, preRendered);
 
-  extractCSS(template) {
-    return template.match(/<style>[^]*?<\/style>/g).map(str => str.replace(/<\/?style>/g,'')).join('\n');
-  }
+              // wait for component to be initiated
+              setTimeout(() => {
 
-  extractNonCSS(template) {
-    return template.replace(/<style>[^]*?<\/style>/g, '');
-  }
-
-  // build just the template element
-  buildWithTemplate(vm = {}) {
-    return html`
-      ${this.getTemplateElementAsString(vm)}
-      <${this.name} id="$${toCamelCase(this.name)}"></${this.name}>
-      <script>${this.getClassAsString(true)}</script>
-    `;
-  }
-
-  // build just the class
-  buildWithoutTemplate() {
-    return html`
-      <${this.name} id="$${toCamelCase(this.name)}"></${this.name}>
-      <script>${this.getClassAsString()}</script>
-    `;
+                // wait for nested components to render
+                setTimeout(() => {
+                  // swap out static html for component
+                  el.style = '';
+                  preRendered.remove();
+                }, 0);
+              }, 0);
+            }
+          }, 0);
+        </script>
+      `
+    };
   }
 
   buildClientConstructorString(options = {}) {
@@ -234,8 +219,6 @@ class CustomElementsNode {
       shadowRoot.appendChild(templateContent.cloneNode(true));
     `;
 
-    // TODO check if user is alreader cloning there template
-    // TODO add option to not automatically clone template
     // This is injected to allow a template cloner to be used
     const newConstructor = `
     constructor() {
@@ -243,12 +226,7 @@ class CustomElementsNode {
       ${this.hasOriginalConstructor ? 'this.constructor_original();' : ''}
       ${(options.renderTemplate !== false && this.hasTemplate) ? templateCloner : ''}
     }
-
-    get renderBlock() {
-      return ${this._exported ? 'this.shadowRoot.querySelector("slot").assignedNodes().find(n => n.nodeName === "RENDER-BLOCK")' : 'this.shadowRoot.querySelector("render-block")'};
-    }
     `;
-
     const pos = this.modifiedConstructorString.indexOf('{') + 1;
     if (this.options._addRenderMethod) return [this.modifiedConstructorString.slice(0, pos), newConstructor, this.buildRenderMethod(), this.modifiedConstructorString.slice(pos)].join('');
     return [this.modifiedConstructorString.slice(0, pos), newConstructor, this.modifiedConstructorString.slice(pos)].join('');
