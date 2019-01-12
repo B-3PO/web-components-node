@@ -102,6 +102,7 @@ class CustomElementsNode {
       .replace('super();', '') // remove super with semi-colin
       .replace('super()', ''); // remove super without semi-colin
     this.modifiedConstructor = eval('('+this.modifiedConstructorString+')');
+    this.title = this.modifiedConstructor.title;
     this.renderTemplate = true;
 
     // setup global config
@@ -174,7 +175,7 @@ class CustomElementsNode {
   build(vm = {}) {
     const template = this._elementTemplate(vm);
     return {
-      title: 'title',
+      title: this.title,
       body: `
         ${this.getTemplateElementAsString(vm)}
         <pre-rendered>
