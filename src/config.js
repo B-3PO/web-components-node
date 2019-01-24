@@ -2,12 +2,6 @@
 
 const config = {
   /*
-   * default: 'template'
-   * The default method name for templates used by the template renderer
-   */
-  templateMethod: 'template',
-
-  /*
    * This will memoize certain methods to prevent unnecessary processing
    * This is essantially equal to static file performance after the first request
    */
