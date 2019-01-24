@@ -25,7 +25,7 @@ module.exports = class PageMapper {
   findPage(url) {
     if (this._root && url === '/') url = '/' + this._root;
     const module = this.modules[url.replace(slash_REG, '')];
-    if (typeof module !== 'function') return this._404 || noop;
+    if (typeof module !== 'function' && typeof module !== 'object') return this._404 || noop;
     return this.modules[url.replace(slash_REG, '')];
   }
 

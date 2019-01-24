@@ -15,13 +15,6 @@ const config = {
 
   /*
    * default: true
-   * This will minify the js in component script tags and the component tmeplate html
-   * This can help redice file size
-   */
-  minify: true,
-
-  /*
-   * default: true
    * user built in service worker to manage cache
    */
   serviceWorker: true

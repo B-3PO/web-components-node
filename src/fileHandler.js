@@ -1,5 +1,5 @@
 const config = require('./config');
-const components = require('./componentRegistry');
+const customElements = require('./customElements');
 const main_js = require('./client-files/main.js');
 const serviceWorkerLoader_js = require('./client-files/service-worker-loader.js');
 const serviceWorker_js = require('./client-files/service-worker.js');
@@ -18,13 +18,13 @@ function getMime(file) {
 
 exports.scripts = (params) => {
   validate(params);
-  if (params.path.includes('wcn.js')) return `${main_js(params)}\n${config.get('serviceWorker') ? serviceWorkerLoader_js(params) : ''}\n${components.staticFile(params)}`;
+  if (params.path.includes('wcn.js')) return `${main_js(params)}\n${config.get('serviceWorker') ? serviceWorkerLoader_js(params) : ''}\n${customElements.getStaticFile()}`;
   if (params.path.includes('service-worker.js')) return `${serviceWorker_js(params)}`;
 };
 
 exports.css = (params) => {
    validate(params);
-   if (params.path.includes('wcn.css')) return `${components.staticComponentCSS(params)}`;
+   if (params.path.includes('wcn.css')) return `${customElements.getStaticExternalCSS()}`;
 };
 
 exports.expressFileHandler = (req, res, next) => {
@@ -39,5 +39,6 @@ exports.expressFileHandler = (req, res, next) => {
 
   if (!content) return next();
   res.type(mime);
+  // res.setHeader('Cache-Control', 'public, max-age=86400');
   res.send(content);
 };

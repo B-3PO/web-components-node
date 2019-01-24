@@ -10,4 +10,5 @@ module.exports = params => `
     return finalString;
   };
   window.htmlSafe = window.html;
+  window.css = window.html;
 `;
