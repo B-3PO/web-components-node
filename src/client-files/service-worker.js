@@ -1,4 +1,4 @@
-module.exports = params => `
+module.exports = () => `
   var _cacheName = 'wcn-cache';
 
   self.addEventListener('install', function (event) {
@@ -34,7 +34,7 @@ module.exports = params => `
       caches.open(_cacheName).then(function (cache) {
         return cache.match(event.request).then(function (response) {
           return response || fetch(event.request).then(function (response) {
-            cache.put(event.request, response.clone());
+            if (!event.request.url.includes('load-service-worker.js')) cache.put(event.request, response.clone());
             return response;
           }).catch(function() {
             return caches.match('/offline.html');
